@@ -1,0 +1,31 @@
+{
+	"geode": "4.6.3",
+	"gd": {
+		"win": "2.2074",
+		"android": "2.2074",
+		"mac": "2.2074",
+		"ios": "2.2074"
+	},
+	"id": "hbg1010.autorate",
+	"name": "Auto Rate",
+	"version": "v1.0.0",
+	"developer": "Hbg1010",
+	"description": "Automatically rate stars on unrated levels",
+	"tags": ["online"],
+	"links": {
+		"source": "https://github.com/Hbg1010/Auto-Rate-Geode",
+		"community": "https://discord.gg/V4xQnNxfNh"
+	},
+	"issues": {
+		"url": "https://github.com/Hbg1010/Auto-Rate-Geode/issues",
+		"info": "If you find any bugs, or have any feature requests, please post them on the github!"
+	},
+	"settings": {
+		"enable":{
+			"type": "bool",
+			"default": true,
+			"name": "Enable",
+			"description": "Allows you to soft toggle the mod!"
+		}
+	}
+}
