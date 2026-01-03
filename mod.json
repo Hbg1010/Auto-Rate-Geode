@@ -1,5 +1,5 @@
 {
-	"geode": "4.6.3",
+	"geode": "4.10.0",
 	"gd": {
 		"win": "2.2074",
 		"android": "2.2074",
@@ -8,7 +8,7 @@
 	},
 	"id": "hbg1010.autorate",
 	"name": "Auto Rate",
-	"version": "v1.0.0",
+	"version": "v1.1.0",
 	"developer": "Hbg1010",
 	"description": "Automatically rate stars on unrated levels",
 	"tags": ["online"],
@@ -26,6 +26,25 @@
 			"default": true,
 			"name": "Enable",
 			"description": "Allows you to soft toggle the mod!"
+		},
+		"Demon": {
+			"type": "title",
+			"description": "Demon rating settings",
+			"name": "Demon Rating"
+		},
+		"enableDemon": {
+			"type": "bool",
+			"default": true,
+			"name": "Auto Demon Rating",
+			"description": "Allows you to toggle auto rating demons"
+		},
+		"DemonRatingMethod": {
+			"type": "string",
+			"default": "Automatic",
+			"one-of": ["Automatic", "Easy", "Medium", "Hard", "Insane", "Extreme"],
+			"description": "Toggle which demon rating should be used. Automatic will rate levels their current demon difficulty.",
+			"enable-if": "enableDemon",
+			"name": "Demon Rating"
 		}
 	}
 }
