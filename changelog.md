@@ -1,3 +1,6 @@
+# 1.2.0
+- Gd 2.2081 / geode 5.0 support
+
 # 1.1.0
 - Added automatic demon ratings
     - You can toggle Automatic demon ratings in this mod's settings
