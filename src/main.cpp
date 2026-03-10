@@ -29,6 +29,7 @@ class $modify(AutoRateLayer, LevelInfoLayer) {
             // unrated
             if (!m_level->m_stars.value() && m_starRateBtn && m_starRateBtn->isEnabled()) {
                 RateStarsLayer* rsl = RateStarsLayer::create(m_level->m_levelID, m_level->isPlatformer(), false);
+                if (!rsl) return;
                 int starVal = m_level->m_starsRequested;
                 if (!starVal) {
                     int avg = m_level->getAverageDifficulty();
@@ -45,6 +46,7 @@ class $modify(AutoRateLayer, LevelInfoLayer) {
             // demon rates
             } else if (m_level->m_demon.value() && GET_SETTING_BOOL(modPointer, "enableDemon") && m_demonRateBtn && m_demonRateBtn->isEnabled()) {
                 RateDemonLayer* RDL = RateDemonLayer::create(m_level->m_levelID);
+                if (!RDL) return;
                 std::string mode = GET_SETTING_STRING(modPointer, "DemonRatingMethod");
                 RDL->m_demonRate = mode == "Automatic" 
                     ? DemonAutoVal(m_level->m_demonDifficulty)
