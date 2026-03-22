@@ -8,7 +8,7 @@
 	},
 	"id": "hbg1010.autorate",
 	"name": "Auto Rate",
-	"version": "v1.2.0",
+	"version": "v1.3.0",
 	"developer": "Hbg1010",
 	"description": "Automatically rate stars on unrated levels",
 	"tags": ["online"],
