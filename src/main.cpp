@@ -1,75 +1,69 @@
 #include <Geode/Geode.hpp>
 #include <Geode/modify/LevelInfoLayer.hpp>
-#include <random>
 
 using namespace geode::prelude;
 
-#define GET_SETTING_BOOL(mod, key) mod->getSettingValue<bool>(key)
-#define GET_SETTING_STRING(mod, key) mod->getSettingValue<std::string>(key)
-
 class $modify(AutoRateLayer, LevelInfoLayer) {
+
     struct Fields {
-        bool hasChecked; // used to check if a level has been liked / evaluated already
+        bool m_hasChecked; // used to check if a level has been liked / evaluated already
     };
 
-    void levelDownloadFinished(GJGameLevel* p0) {
-        LevelInfoLayer::levelDownloadFinished(p0);
-        AutoRate();
+    void levelDownloadFinished(GJGameLevel* level) {
+        LevelInfoLayer::levelDownloadFinished(level);
+        autoRate();
     }
 
     void updateSideButtons() {
-        if (!LevelInfoLayer::shouldDownloadLevel()) AutoRate();
+        if (!LevelInfoLayer::shouldDownloadLevel()) autoRate();
         LevelInfoLayer::updateSideButtons();
-
     }
 
-    void AutoRate() {
-        Mod* modPointer = Mod::get();
-        if (GET_SETTING_BOOL(modPointer, "enable") && !m_fields->hasChecked) {
-            // unrated
-            if (!m_level->m_stars.value() && m_starRateBtn && m_starRateBtn->isEnabled()) {
-                RateStarsLayer* rsl = RateStarsLayer::create(m_level->m_levelID, m_level->isPlatformer(), false);
-                int starVal = m_level->m_starsRequested;
-                if (!starVal) {
-                    int avg = m_level->getAverageDifficulty();
-                    starVal = avg > 0 ? avg : AutoRateLayer::randInt();
-                }
+    void rateStars() {
+        if (m_level->m_stars > 0 || !m_starRateBtn || !m_starRateBtn->isEnabled()) return;
 
-                rsl->m_starsRate = starVal;
-                rsl->onRate(rsl->m_submitButton);
-                CC_SAFE_DELETE(rsl);
-                auto spr = CCSprite::createWithSpriteFrameName("GJ_starBtn2_001.png");
-                m_starRateBtn->setSprite(spr);
-                m_starRateBtn->m_bEnabled = false;
-
-            // demon rates
-            } else if (m_level->m_demon.value() && GET_SETTING_BOOL(modPointer, "enableDemon") && m_demonRateBtn && m_demonRateBtn->isEnabled()) {
-                RateDemonLayer* RDL = RateDemonLayer::create(m_level->m_levelID);
-                std::string mode = GET_SETTING_STRING(modPointer, "DemonRatingMethod");
-                RDL->m_demonRate = mode == "Automatic" 
-                    ? DemonAutoVal(m_level->m_demonDifficulty)
-                    : DemonOverrideVal(mode);
-                RDL->onRate(RDL->m_submitButton);
-                CC_SAFE_DELETE(RDL);
-                auto spr = CCSprite::createWithSpriteFrameName("GJ_rateDiffBtn2_001.png");
-                m_demonRateBtn->setSprite(spr);
-                m_demonRateBtn->m_bEnabled = false;
-            }
+        int starVal = m_level->m_starsRequested;
+        if (starVal == 0) {
+            int avg = m_level->getAverageDifficulty();
+            starVal = avg > 0 ? avg : utils::random::generate(1, 10);
         }
-        m_fields->hasChecked = true;
+
+        GameLevelManager::get()->rateStars(m_level->m_levelID, starVal);
+
+        auto spr = CCSprite::createWithSpriteFrameName("GJ_starBtn2_001.png");
+        m_starRateBtn->setSprite(spr);
+        m_starRateBtn->setEnabled(false);
     }
 
-    // for those pesky "I didn't request a rating" guys (You know who you are) with 0 player submitted rating
-    int randInt() {
-        std::mt19937 gen(std::random_device{}());
-        std::uniform_int_distribution<> distrib(1, 10);
-        return distrib(gen);
+    void rateDemon() {
+        if (m_level->m_demon == 0 || !Mod::get()->getSettingValue<bool>("enableDemon") || !m_demonRateBtn || !m_demonRateBtn->isEnabled()) return;
+
+        auto mode = Mod::get()->getSettingValue<std::string>("DemonRatingMethod");
+
+        auto demonRate = mode == "Automatic" 
+            ? demonAutoValue(m_level->m_demonDifficulty)
+            : demonOverrideValue(mode);
+
+        GameLevelManager::get()->rateDemon(m_level->m_levelID, demonRate, false);
+
+        auto spr = CCSprite::createWithSpriteFrameName("GJ_rateDiffBtn2_001.png");
+        m_demonRateBtn->setSprite(spr);
+        m_demonRateBtn->setEnabled(false);
+    }
+
+    void autoRate() {
+        auto fields = m_fields.self();
+        if (!Mod::get()->getSettingValue<bool>("enable") || fields->m_hasChecked) return;
+
+        rateStars();
+        rateDemon();
+        
+        fields->m_hasChecked = true;
     }
 
     // i hate this mapping so much dude just make it make sense 
-    int DemonAutoVal (int difficulty) {
-        switch (difficulty)
-        {
+    int demonAutoValue(int difficulty) {
+        switch (difficulty) {
             case 3: return 1;
             case 4: return 2;
             case 5: return 4;
@@ -80,17 +74,18 @@ class $modify(AutoRateLayer, LevelInfoLayer) {
     }
 
     // custom vals. I didn't wanna make a custom settings menu for an enum sry
-    int DemonOverrideVal(std::string& val) {
-        if (val == "Easy") {
-            return 1; 
-        } else if (val == "Medium") {
-            return 2;
-        } else if (val == "Hard") {
-            return 3;
-        } else if (val == "Insane") {
-            return 4;
-        } else {
-            return 5;
-        }
+    int demonOverrideValue(std::string_view value) {
+        static const StringMap<int> overrides = {
+            {"Easy", 1},
+            {"Medium", 2},
+            {"Hard", 3},
+            {"Insane", 4},
+            {"Extreme", 5},
+            {"Automatic", 5}
+        };
+        auto iter = overrides.find(value);
+        if (iter == overrides.end()) return 5;
+
+        return iter->second;
     }
 };
