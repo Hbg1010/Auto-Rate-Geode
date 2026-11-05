@@ -1,3 +1,6 @@
+# 1.3.1
+- Ported to Geode 6 and 2.209
+
 # 1.3.0
 - Rewrite credit of Alphalaneous <3
     - Fixed crashes

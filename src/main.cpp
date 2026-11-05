@@ -6,7 +6,7 @@ using namespace geode::prelude;
 class $modify(AutoRateLayer, LevelInfoLayer) {
 
     struct Fields {
-        bool m_hasChecked; // used to check if a level has been liked / evaluated already
+        bool m_hasChecked; // used to check if a level has been  evaluated already
     };
 
     void levelDownloadFinished(GJGameLevel* level) {
